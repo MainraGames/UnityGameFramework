@@ -22,8 +22,8 @@ namespace MainraFramework.Parameter
             public const string MAINMENU = "MainMenu";
             public const string GAMEPLAY = "Gameplay";
             public const string GAMEOVER = "GameOver";
-            public const string CREDITS = "Credits";
             public const string LOADING = "Loading";
+            public const string SPLASHSCREEN = "SplashScreen";
         }
         public static class AnimParams
         {

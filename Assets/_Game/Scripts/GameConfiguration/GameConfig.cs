@@ -12,6 +12,12 @@ namespace _Game.Scripts.GameConfiguration
         [SerializeField] private GameSettings _gameSettings;
         #endregion
 
+        #region  Project Settings
+        [Header("Project Settings")]
+        [SerializeField] private bool useCustomSplashScreen;
+
+        #endregion
+
         #region Public Accessors
         public string ProductName => _productName;
         public string ProductVersion => _productVersion;
