@@ -205,6 +205,13 @@ MonoBehaviour:
   ignoreTimeScale: 0
   queueTransitions: 0
   enableDebugLogs: 0
+  preventRedundantTransitions: 1
+  showOnEnable: 1
+  hideOnEscape: 0
+  focusFirstSelectable: 0
+  firstSelected: {fileID: 0}
+  hideOnBackgroundClick: 0
+  backgroundCloseButton: {fileID: 0}
   splashImage: {fileID: 466040965}
 --- !u!225 &296982460
 CanvasGroup:
@@ -276,7 +283,7 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 6763a82c106099949a393d586c664591, type: 3}
-  m_Type: 3
+  m_Type: 0
   m_PreserveAspect: 1
   m_FillCenter: 1
   m_FillMethod: 0
@@ -370,7 +377,7 @@ Canvas:
   m_OverridePixelPerfect: 0
   m_SortingBucketNormalizedSize: 0
   m_VertexColorAlwaysGammaSpace: 0
-  m_AdditionalShaderChannelsFlag: 0
+  m_AdditionalShaderChannelsFlag: 25
   m_UpdateRectTransformForStandalone: 0
   m_SortingLayerID: 0
   m_SortingOrder: 0

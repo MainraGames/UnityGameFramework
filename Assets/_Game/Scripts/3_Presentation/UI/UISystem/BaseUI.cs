@@ -3,6 +3,11 @@ using DG.Tweening;
 using System;
 using Sirenix.OdinInspector;
 using System.Collections.Generic;
+using UnityEngine.UI;
+using UnityEngine.EventSystems;
+#if ENABLE_INPUT_SYSTEM
+using UnityEngine.InputSystem;
+#endif
 
 [RequireComponent(typeof(CanvasGroup))]
 public abstract class BaseUI : MonoBehaviour
@@ -88,6 +93,34 @@ public abstract class BaseUI : MonoBehaviour
     [TabGroup("Advanced", "Debug")]
     [SerializeField] private bool enableDebugLogs = false;
 
+    [TabGroup("Advanced", "Behavior")]
+    [Tooltip("Ignore redundant show/hide calls when already in the target state.")]
+    [SerializeField] private bool preventRedundantTransitions = true;
+
+    [TabGroup("Advanced", "Behavior")]
+    [Tooltip("Automatically call Show() when this object is enabled and not already visible.")]
+    [SerializeField] private bool showOnEnable = true;
+
+    [TabGroup("Advanced", "Input")]
+    [Tooltip("Press Escape/Back to hide this UI.")]
+    [SerializeField] private bool hideOnEscape = false;
+
+    [TabGroup("Advanced", "Input")]
+    [Tooltip("Set UI focus to the specified Selectable after Show completes.")]
+    [SerializeField] private bool focusFirstSelectable = false;
+
+    [TabGroup("Advanced", "Input")]
+    [ShowIf("focusFirstSelectable")]
+    [SerializeField] private Selectable firstSelected;
+
+    [TabGroup("Advanced", "Input")]
+    [Tooltip("If set, clicking this background button will hide this UI.")]
+    [SerializeField] private bool hideOnBackgroundClick = false;
+
+    [TabGroup("Advanced", "Input")]
+    [ShowIf("hideOnBackgroundClick")]
+    [SerializeField] private Button backgroundCloseButton;
+
     private bool isTransitioning;
     private Queue<TransitionRequest> transitionQueue = new Queue<TransitionRequest>();
 
@@ -133,9 +166,9 @@ public abstract class BaseUI : MonoBehaviour
         // Initial setup based on useTransition
         if (useTransition)
         {
-            // Start hidden with no input
+            // Start hidden; optionally disable input during transition
             canvasGroup.alpha = 0f;
-            SetInput(true);
+            if (disableInputDuringTransition) SetInput(false);
             // Show with transition
             Show(true);
         }
@@ -163,6 +196,13 @@ public abstract class BaseUI : MonoBehaviour
 
     public virtual void Show(bool useTransition = true, Action callback = null)
     {
+        if (preventRedundantTransitions && IsVisible())
+        {
+            Log("Show ignored - already visible.");
+            callback?.Invoke();
+            return;
+        }
+
         if (isTransitioning && queueTransitions)
         {
             transitionQueue.Enqueue(new TransitionRequest { isShow = true, useTransition = useTransition, callback = callback });
@@ -260,6 +300,25 @@ public abstract class BaseUI : MonoBehaviour
             SetInput(true);
         }
         isTransitioning = false;
+
+        // Focus first selectable if requested
+        if (focusFirstSelectable && firstSelected != null)
+        {
+            var es = EventSystem.current;
+            if (es != null)
+            {
+                try
+                {
+                    firstSelected.Select();
+                    es.SetSelectedGameObject(firstSelected.gameObject);
+                }
+                catch (Exception e)
+                {
+                    Log($"Focus selection failed: {e.Message}");
+                }
+            }
+        }
+
         Log("Show complete.");
         OnShowComplete?.Invoke();
         callback?.Invoke();
@@ -269,6 +328,13 @@ public abstract class BaseUI : MonoBehaviour
 
     public virtual void Hide(bool useTransition = true, Action callback = null)
     {
+        if (preventRedundantTransitions && !IsVisible())
+        {
+            Log("Hide ignored - already hidden.");
+            callback?.Invoke();
+            return;
+        }
+
         if (isTransitioning && queueTransitions)
         {
             transitionQueue.Enqueue(new TransitionRequest { isShow = false, useTransition = useTransition, callback = callback });
@@ -413,6 +479,10 @@ public abstract class BaseUI : MonoBehaviour
     public bool IsVisible() => gameObject.activeSelf && canvasGroup.alpha > 0f;
     public bool IsTransitioning() => isTransitioning;
 
+    // Convenience properties
+    public bool Visible => IsVisible();
+    public bool Transitioning => isTransitioning;
+
     private void SetInput(bool state)
     {
         if (canvasGroup != null)
@@ -428,8 +498,60 @@ public abstract class BaseUI : MonoBehaviour
             Debug.Log($"[{gameObject.name}] {message}");
     }
 
+    protected virtual void OnEnable()
+    {
+        if (showOnEnable && !IsVisible() && !isTransitioning)
+        {
+            Show();
+        }
+        if (hideOnBackgroundClick && backgroundCloseButton != null)
+        {
+            backgroundCloseButton.onClick.RemoveListener(OnBackgroundCloseClicked);
+            backgroundCloseButton.onClick.AddListener(OnBackgroundCloseClicked);
+        }
+    }
+
+    protected virtual void OnDisable()
+    {
+        if (backgroundCloseButton != null)
+        {
+            backgroundCloseButton.onClick.RemoveListener(OnBackgroundCloseClicked);
+        }
+    }
+
+    private void Update()
+    {
+        if (!hideOnEscape || isTransitioning || !IsVisible()) return;
+#if ENABLE_INPUT_SYSTEM
+        if (Keyboard.current != null && Keyboard.current.escapeKey.wasPressedThisFrame)
+        {
+            Hide();
+            return;
+        }
+#endif
+#if ENABLE_LEGACY_INPUT_MANAGER
+        if (Input.GetKeyDown(KeyCode.Escape))
+        {
+            Hide();
+            return;
+        }
+#endif
+    }
+
+    public void InstantShow(Action callback = null) => Show(false, callback);
+    public void InstantHide(Action callback = null) => Hide(false, callback);
+
+    private void OnBackgroundCloseClicked()
+    {
+        Hide();
+    }
+
     private void OnDestroy()
     {
+        if (backgroundCloseButton != null)
+        {
+            backgroundCloseButton.onClick.RemoveListener(OnBackgroundCloseClicked);
+        }
         CancelTransition();
     }
 }
