@@ -23,6 +23,6 @@ public class GameBootstrapper : IInitializable
     {
         Application.targetFrameRate = gameConfig.GameSettings.targetFrameRate;
         QualitySettings.vSyncCount = gameConfig.GameSettings.vSync ? 1 : 0;
-        _sceneLoader.LoadSceneThroughLoadingAsync(Parameter.Scenes.MAINMENU);
+        _sceneLoader.LoadScene(Parameter.Scenes.SPLASHSCREEN);
     }
 }

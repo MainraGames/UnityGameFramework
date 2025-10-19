@@ -15,14 +15,14 @@ EditorBuildSettings:
     path: Assets/_Game/Scenes/Loading.unity
     guid: a9780a1107b97dc4bb342a3032400dca
   - enabled: 1
+    path: Assets/_Game/Scenes/SplashScreen.unity
+    guid: 60d8bb1751d7054438a6501fde72f4c9
+  - enabled: 1
     path: Assets/_Game/Scenes/MainMenu.unity
     guid: f4b069e1b790e3844a67fdfc57b1e839
   - enabled: 1
     path: Assets/_Game/Scenes/Gameplay.unity
     guid: b98547d66a8515341818997f53a30b31
-  - enabled: 0
-    path: Assets/Plugins/PrimeTween/Demo/Demo_URP.unity
-    guid: 15054139658a5445689224c71f805b10
   m_configObjects:
     com.unity.input.settings.actions: {fileID: -944628639613478452, guid: 052faaac586de48259a63d0c4782560b, type: 3}
   m_UseUCBPForAssetBundles: 0
