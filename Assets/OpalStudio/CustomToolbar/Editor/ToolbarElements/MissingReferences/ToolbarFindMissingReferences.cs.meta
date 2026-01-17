@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 41883855edc446e4a9da6ca484fdba08
+timeCreated: 1753026406
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/ToolbarElements/MissingReferences/ToolbarFindMissingReferences.cs
+  uploadId: 838936

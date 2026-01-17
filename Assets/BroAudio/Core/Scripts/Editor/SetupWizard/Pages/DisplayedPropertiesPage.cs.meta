@@ -5,6 +5,6 @@ AssetOrigin:
   serializedVersion: 1
   productId: 257362
   packageName: Bro Audio
-  packageVersion: 2.2.0
+  packageVersion: 2.2.1
   assetPath: Assets/BroAudio/Core/Scripts/Editor/SetupWizard/Pages/DisplayedPropertiesPage.cs
-  uploadId: 783268
+  uploadId: 799754

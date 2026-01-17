@@ -9,7 +9,7 @@ namespace PrimeTweenDemo {
         void OnEnable() {
             models = GetComponentsInChildren<MeshRenderer>();
             foreach (var mr in models) {
-                _ = mr.material; // copy shared material
+                mr.sharedMaterial = new Material(mr.sharedMaterial); // copy shared material
             }
         }
     }

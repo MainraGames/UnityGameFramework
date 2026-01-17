@@ -26,11 +26,6 @@ namespace PrimeTweenDemo {
         readonly List<int[]> filteredPaths = new List<int[]>();
         int lastProcessedFrame = -1;
 
-        void Awake() {
-            filterAllocations.Add("PrimeTween.Runtime");
-            filterAllocations.Add("PrimeTweenDemo");
-        }
-
         void OnEnable() {
             ProfilerDriver.ClearAllFrames();
         }

@@ -18,7 +18,8 @@ namespace PrimeTweenDemo {
         Sequence PlayFlipAnimation() {
             if (!sequence.isAlive) {
                 const float jumpDuration = 0.3f;
-                sequence = Tween.LocalPositionZ(animationAnchor, 0.2f, jumpDuration)
+                sequence = Sequence.Create()
+                    .Chain(Tween.LocalPositionZ(animationAnchor, 0.2f, jumpDuration))
                     .Chain(Tween.LocalEulerAngles(animationAnchor, Vector3.zero, new Vector3(0, 360, 0), 0.9f, Ease.InOutBack))
                     .Chain(Tween.LocalPositionZ(animationAnchor, 0, jumpDuration));
             }

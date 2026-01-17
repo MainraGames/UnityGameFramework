@@ -278,7 +278,6 @@ MonoBehaviour:
   - {fileID: 460664918}
   - {fileID: 810504353}
   wheels: {fileID: 810504353}
-  timeScale: 1
 --- !u!4 &182366649
 Transform:
   m_ObjectHideFlags: 0
@@ -2820,13 +2819,16 @@ MonoBehaviour:
   logAllocations: 1
   logFiltered: 0
   logIgnored: 0
-  filterAllocations: []
+  filterAllocations:
+  - PrimeTween.Runtime
+  - PrimeTweenDemo
   ignoreAllocations:
   - RaycastHit.get_collider()
   - Component.get_transform()
   - Component.get_gameObject()
   - MeasureMemoryAllocations
   - DebugInfo
+  - Slider.set_value
 --- !u!114 &1755549107
 MonoBehaviour:
   m_ObjectHideFlags: 0

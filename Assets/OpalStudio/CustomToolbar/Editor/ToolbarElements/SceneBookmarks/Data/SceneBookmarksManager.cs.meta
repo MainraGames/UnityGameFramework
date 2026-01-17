@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 92a240dc166e424288aaa2c167f2f9b0
+timeCreated: 1753028712
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/ToolbarElements/SceneBookmarks/Data/SceneBookmarksManager.cs
+  uploadId: 838936

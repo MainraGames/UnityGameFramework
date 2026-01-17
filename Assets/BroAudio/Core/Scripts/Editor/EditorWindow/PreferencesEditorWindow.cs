@@ -3,11 +3,14 @@ using Ami.Extension.Reflection;
 using System.IO;
 using System.Linq;
 using UnityEditor;
+using UnityEditor.Compilation;
 using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Audio;
 using Ami.BroAudio.Data;
-using Ami.BroAudio.Runtime;
+#if UNITY_2022_3_OR_NEWER
+using UnityEditor.Build;
+#endif
 using static Ami.BroAudio.Editor.IconConstant;
 using static Ami.BroAudio.Editor.Section;
 using static Ami.BroAudio.Editor.Setting.BroAudioGUISetting;
@@ -39,7 +42,7 @@ namespace Ami.BroAudio.Editor.Setting
 
         private readonly float[] _tabLabelRatios = new float[] { 0.33f,0.33f,0.34f};
 
-        private GUIContent _pitchGUIContent, _audioVoicesGUIContent, _virtualTracksGUIContent, _dominatorTrackGUIContent, _regenerateUserDataGUIContent;
+        private GUIContent _pitchGUIContent, _audioVoicesGUIContent, _virtualTracksGUIContent, _dominatorTrackGUIContent, _regenerateUserDataGUIContent, _addManualInitGUIContent;
 
 #if PACKAGE_ADDRESSABLES
         private GUIContent _addressableConversionGUIContent; 
@@ -49,7 +52,6 @@ namespace Ami.BroAudio.Editor.Setting
         private Tab _currSelectedTab = Tab.Audio;
         private int _currProjectSettingVoiceCount = -1;
         private int _currentMixerTracksCount = -1;
-        private int _broVirtualTracksCount = BroAdvice.VirtualTrackCount;
         private BroInstructionHelper _instruction = new BroInstructionHelper();
         private AudioMixerGroup _duplicateTrackSource = null;
         private AudioMixer _mixer = null;
@@ -120,6 +122,7 @@ namespace Ami.BroAudio.Editor.Setting
             _virtualTracksGUIContent = new GUIContent("Bro Virtual Tracks", _instruction.GetText(Instruction.BroVirtualToolTip));
             _dominatorTrackGUIContent = new GUIContent("Add Dominator Track", _instruction.GetText(Instruction.AddDominatorTrack));
             _regenerateUserDataGUIContent = new GUIContent("Regenerate User Data", _instruction.GetText(Instruction.RegenerateUserData));
+            _addManualInitGUIContent = new GUIContent("Initialize Bro Audio Manually", _instruction.GetText(Instruction.ManualInitialization));
             
 #if PACKAGE_ADDRESSABLES
             string aaTooltip = _instruction.GetText(Instruction.LibraryManager_AddressableConversionTooltip);
@@ -256,23 +259,15 @@ namespace Ami.BroAudio.Editor.Setting
             if (HasValidProjectSettingVoiceCount())
             {
                 EditorGUI.BeginDisabledGroup(true);
-                {
-                    Rect voiceRect = GetRectAndIterateLine(drawPos);
-                    EditorGUI.LabelField(voiceRect, _audioVoicesGUIContent);
-                    voiceRect.x += 150f;
-                    voiceRect.width = 100f;
-                    EditorGUI.IntField(voiceRect, _currProjectSettingVoiceCount);
-
-                    Rect virtualTracksRect = GetRectAndIterateLine(drawPos);
-                    EditorGUI.LabelField(virtualTracksRect, _virtualTracksGUIContent);
-                    virtualTracksRect.x += 150f;
-                    virtualTracksRect.width = 100f;
-                    EditorGUI.IntField(virtualTracksRect, _broVirtualTracksCount);
-                }
+                Rect voiceRect = VoiceSettingPrefixLabel(_audioVoicesGUIContent);
+                EditorGUI.IntField(voiceRect, _currProjectSettingVoiceCount);
                 EditorGUI.EndDisabledGroup();
+                
+                Rect virtualTracksRect = VoiceSettingPrefixLabel(_virtualTracksGUIContent);
+                EditorSetting.VirtualTrackCount = EditorGUI.IntField(virtualTracksRect, EditorSetting.VirtualTrackCount);
             }
 
-            if (HasValidMixerTracksCount() && _currentMixerTracksCount < _currProjectSettingVoiceCount + _broVirtualTracksCount)
+            if (HasValidMixerTracksCount() && _currentMixerTracksCount < _currProjectSettingVoiceCount + EditorSetting.VirtualTrackCount)
             {
                 Rect warningBoxRect = GetRectAndIterateLine(drawPos);
                 warningBoxRect.height *= 3;
@@ -291,19 +286,28 @@ namespace Ami.BroAudio.Editor.Setting
                 autoMatchBtnRect.height *= 2f;
                 autoMatchBtnRect.x += IndentInPixel *2;
                 autoMatchBtnRect.width -= IndentInPixel *2;
-                if (GUI.Button(autoMatchBtnRect, AutoMatchTracksButtonText)
-                    && EditorUtility.DisplayDialog("Confirmation", _instruction.GetText(Instruction.AddTracksConfirmationDialog), "OK", "Cancel"))
+                if (GUI.Button(autoMatchBtnRect, AutoMatchTracksButtonText) 
+                    && EditorUtility.DisplayDialog("Auto-Add Tracks to Match Voice Count", _instruction.GetText(Instruction.AddTracksConfirmationDialog), "OK", "Cancel"))
                 {
                     AutoMatchAudioVoices();
                 }
                 DrawEmptyLine(2); // For Match Button
+            }
+
+            Rect VoiceSettingPrefixLabel(GUIContent label)
+            {
+                Rect rect = GetRectAndIterateLine(drawPos);
+                EditorGUI.LabelField(rect, label);
+                rect.x += 150f;
+                rect.width = 100f;
+                return rect;
             }
         }
 
         private void AutoMatchAudioVoices()
         {
             AudioMixerGroup mainTrack = AudioMixer.FindMatchingGroups(MainTrackName)?.Where(x => x.name.Length == MainTrackName.Length).FirstOrDefault();
-            if (mainTrack == default || _currentMixerTracksCount == default)
+            if (mainTrack == null || _currentMixerTracksCount == 0)
             {
                 Debug.LogError(LogTitle + "Can't get the Main track or other BroAudio track");
                 return;
@@ -311,7 +315,7 @@ namespace Ami.BroAudio.Editor.Setting
 
             if(_duplicateTrackSource)
             {
-                for(int i = _currentMixerTracksCount +1 ; i <= _currProjectSettingVoiceCount + _broVirtualTracksCount; i++)
+                for(int i = _currentMixerTracksCount +1 ; i <= _currProjectSettingVoiceCount + EditorSetting.VirtualTrackCount; i++)
                 {
                     string trackName = $"{GenericTrackName}{i}";
                     BroAudioReflection.DuplicateBroAudioTrack(AudioMixer, mainTrack, _duplicateTrackSource, trackName);
@@ -418,13 +422,16 @@ namespace Ami.BroAudio.Editor.Setting
             }
             DrawEmptyLine(1);
 #endif
+            drawPosition.xMax += Gap;
+            
+            DrawManualInitializationToggle(drawPosition);
+            DrawEmptyLine(1);
 
             if (Button(_dominatorTrackGUIContent))
             {
                 AddDominatorTrack();
             }
             DrawEmptyLine(1);
-
 
             if (Button(_regenerateUserDataGUIContent))
             {
@@ -442,8 +449,35 @@ namespace Ami.BroAudio.Editor.Setting
 
             bool Button(GUIContent label)
             {
-                Rect buttonRect = GetRectAndIterateLine(drawPosition).GetHorizontalCenterRect(400f, SingleLineSpace * 1.5f);
+                Rect buttonRect = GetRectAndIterateLine(drawPosition).GetHorizontalCenterRect(350f, SingleLineSpace * 1.5f);
                 return GUI.Button(buttonRect, label);
+            }
+        }
+
+        private void DrawManualInitializationToggle(Rect drawPosition)
+        {
+            EditorGUI.BeginChangeCheck();
+            using (new EditorGUI.DisabledScope(EditorApplication.isCompiling))
+            {
+                var toggleRect  = GetRectAndIterateLine(drawPosition);
+#if BroAudio_InitManually
+                EditorGUI.ToggleLeft(toggleRect, _addManualInitGUIContent, true);
+#else
+                EditorGUI.ToggleLeft(toggleRect, _addManualInitGUIContent, false);
+#endif
+            }
+
+            if (EditorApplication.isCompiling)
+            {
+                EditorGUI.LabelField(GetRectAndIterateLine(drawPosition), "      Waiting for compilation...");
+            }
+            else if (EditorGUI.EndChangeCheck())
+            {
+#if BroAudio_InitManually
+                ScriptingDefinesUtility.RemoveManualInitScriptingDefineSymbol();
+#else
+                ScriptingDefinesUtility.AddManualInitScriptingDefineSymbol();
+#endif
             }
         }
 

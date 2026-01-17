@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: e34a254676414f94f8d1b93ed53e590a
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 320557
+  packageName: PieTabs
+  packageVersion: 2.1.1
+  assetPath: Assets/PinePie/PieTabs/editor/Core/Scripts/Anchor Utility/PieTabs_AnchorSO.cs
+  uploadId: 833408

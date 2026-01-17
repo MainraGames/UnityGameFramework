@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 51f2dd06bbcd7424b8501d037dd96c27
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 330928
+  packageName: Memo - Editor sticky notes and Trello integration
+  packageVersion: 1.0.1
+  assetPath: Assets/PinwheelStudio/Memo/Editor/Scripts/Core/Link.cs
+  uploadId: 786352

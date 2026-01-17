@@ -9,7 +9,7 @@ namespace PrimeTweenDemo {
         float currentSpeed;
 
         void Awake() {
-            _ = roadModel.material; // copy shared material
+            roadModel.sharedMaterial = new Material(roadModel.sharedMaterial); // copy shared material
         }
 
         public override Sequence Animate(bool isAnimating) {
@@ -22,7 +22,7 @@ namespace PrimeTweenDemo {
         }
 
         void Update() {
-            roadModel.material.mainTextureOffset += new Vector2(-1f, 1f) * currentSpeed * Time.deltaTime;
+            roadModel.sharedMaterial.mainTextureOffset += new Vector2(-1f, 1f) * currentSpeed * Time.deltaTime;
         }
     }
 }

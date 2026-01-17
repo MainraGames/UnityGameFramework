@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: c52f4e4048304014a970fa3f8c1900e0
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 320557
+  packageName: PieTabs
+  packageVersion: 2.1.1
+  assetPath: Assets/PinePie/PieTabs/editor/Core/Scripts/DataCache.cs
+  uploadId: 833408

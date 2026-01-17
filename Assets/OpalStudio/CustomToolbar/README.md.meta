@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 7a0b61e0bdf0e67438969ff1f2055081
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/README.md
+  uploadId: 838936

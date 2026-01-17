@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: cd203d3433f31f14c96dcd2b0dae7600
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 320557
+  packageName: PieTabs
+  packageVersion: 2.1.1
+  assetPath: Assets/PinePie/PieTabs/editor/Core/Scripts/TabsPrefs.cs
+  uploadId: 833408

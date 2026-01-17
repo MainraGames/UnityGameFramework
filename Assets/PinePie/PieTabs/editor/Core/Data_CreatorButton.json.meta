@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: cbe365c24d9a4c84d83b7aac3e542379
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 320557
+  packageName: PieTabs
+  packageVersion: 2.1.1
+  assetPath: Assets/PinePie/PieTabs/editor/Core/Data_CreatorButton.json
+  uploadId: 833408

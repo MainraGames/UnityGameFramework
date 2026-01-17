@@ -14,7 +14,6 @@ namespace PrimeTweenDemo {
         [SerializeField] TypewriterAnimatorExample typewriterAnimatorExample;
         [SerializeField] Animatable[] animatables;
         [SerializeField] Wheels wheels;
-        [SerializeField, Range(0.5f, 5f)] float timeScale = 1;
         bool isAnimatingWithCoroutineOrAsync;
         public Sequence animateAllSequence;
 
@@ -59,8 +58,6 @@ namespace PrimeTweenDemo {
         }
 
         void Update() {
-            Time.timeScale = timeScale;
-
             animateAllPartsButton.GetComponent<Image>().enabled = !isAnimatingWithCoroutineOrAsync;
             animateAllPartsButton.GetComponentInChildren<Text>().enabled = !isAnimatingWithCoroutineOrAsync;
 

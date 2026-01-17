@@ -2,6 +2,7 @@
 
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
@@ -181,11 +182,22 @@ namespace WingmanInspector {
                 miniMapGuiContainer.style.height = miniMapHeight;
                 miniMapGuiContainer.style.minHeight = miniMapHeight; 
                 miniMapGuiContainer.onGUIHandler = DrawWingmanGui;
-                
                 Margin(miniMapGuiContainer.style, MiniMapMargin);
+
+                // In Unity 6.2 when double clicking to inspect a prefab, the inspector doesn't always redraw so there might be a leftover
+                // wingman container in the wrong position, so we just remove the prior existing one before inserting the new one if thats the case
+                VisualElement duplicateContainer = editorListVisual.hierarchy.Children().FirstOrDefault(child => child.name == MainWingmanName);
+                duplicateContainer?.RemoveFromHierarchy();
+                
                 editorListVisual.Insert(MiniMapIndex(), miniMapGuiContainer);
                 UpdateComponentVisibility();
             }
+
+            bool searchResultsAreStale = SearchResultsAreStale();
+            if (searchResultsAreStale) {
+                PerformSearch();
+                searchResultsGuiContainer?.MarkDirtyRepaint();
+            } 
 
             bool showingSearchResults = ShowingSearchResults();
             
@@ -196,6 +208,7 @@ namespace WingmanInspector {
                 searchResultsGuiContainer.style.height = FullLength(); 
                 searchResultsGuiContainer.onGUIHandler = DrawSearchResultsGui;
                 editorListVisual.Insert(SearchResultsIndex(), searchResultsGuiContainer);
+                searchResultsGuiContainer?.MarkDirtyRepaint();
             }
             
             if (showingSearchResults && !HasSearchResults()) {
@@ -899,12 +912,11 @@ namespace WingmanInspector {
         }
         
         private void DrawSearchResultsGui() {
-            if (!HasSearchResults() || !InspectingObjectIsValid()) return;
-
+            if (!HasSearchResults() || SearchResultsAreStale() || !InspectingObjectIsValid()) return;
+            
             ToggleAllComonentVisibility(false);
             
             foreach (ComponentSearchResults result in searchResults) {
-                
                 EditorGUILayout.InspectorTitlebar(true, result.Comp, false);
                 
                 EditorGUI.indentLevel++;
@@ -970,6 +982,10 @@ namespace WingmanInspector {
         
         private bool HasSearchResults() {
             return searchResults != null && searchResults.Count > 0;
+        }
+
+        private bool SearchResultsAreStale() {
+            return searchResults != null && searchResults.Count > 0 && !searchResults[0].Comp;
         }
 
         private bool OnlyHasTransform() {

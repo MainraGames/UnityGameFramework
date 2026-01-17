@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: b410f3783b2b19642b8fb2193b405768
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/ToolbarElements/ToolbarReserializeAll.cs
+  uploadId: 838936

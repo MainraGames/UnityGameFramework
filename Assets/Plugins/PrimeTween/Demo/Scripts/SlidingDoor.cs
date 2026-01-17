@@ -25,8 +25,8 @@ namespace PrimeTweenDemo {
                 sequence.Stop();
             }
             var tweenSettings = new TweenSettings(0.4f, Ease.OutBack, endDelay: 0.1f);
-            sequence = Tween.LocalPosition(animationAnchor, midPos, tweenSettings)
-                .Chain(Tween.LocalPosition(animationAnchor, _isClosed ? closedPos : openedPos, tweenSettings));
+            sequence = Tween.LocalPosition(animationAnchor, new TweenSettings<Vector3>(midPos, tweenSettings))
+                .Chain(Tween.LocalPosition(animationAnchor, new TweenSettings<Vector3>(_isClosed ? closedPos : openedPos, tweenSettings)));
             return sequence;
         }
     }

@@ -1,0 +1,13 @@
+{
+    "name": "com.svassets.pietabs",
+    "version": "1.0.1",
+    "displayName": "PieTabs | Browser Enhancer",
+    "description": "Productivity Tool for project browser with multipurpose tabs and smart Address Bar.",
+    "unity": "2021.1",
+    "dependencies": {},
+    "author": {
+        "name": "Sourabh vishwakarma",
+        "email": "sv92295351@gmail.com",
+        "url": "https://sites.google.com/view/pinepie"
+    }
+}

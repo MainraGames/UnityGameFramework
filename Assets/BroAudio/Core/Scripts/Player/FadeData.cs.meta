@@ -1,0 +1,10 @@
+fileFormatVersion: 2
+guid: 322d5e08bc9e4f17abdd246b4e2d4528
+timeCreated: 1759558949
+AssetOrigin:
+  serializedVersion: 1
+  productId: 257362
+  packageName: Bro Audio
+  packageVersion: 2.2.1
+  assetPath: Assets/BroAudio/Core/Scripts/Player/FadeData.cs
+  uploadId: 799754

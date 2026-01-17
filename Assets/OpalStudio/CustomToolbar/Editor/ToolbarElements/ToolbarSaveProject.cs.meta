@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 96d066a68695485ab539a6f45dad8c37
+timeCreated: 1752834814
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/ToolbarElements/ToolbarSaveProject.cs
+  uploadId: 838936

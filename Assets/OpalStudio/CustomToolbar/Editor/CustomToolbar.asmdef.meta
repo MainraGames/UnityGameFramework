@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: e0c08eb4693b0e94ebbc72524bb5d57f
+AssemblyDefinitionImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/CustomToolbar.asmdef
+  uploadId: 838936

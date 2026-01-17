@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 989f414ad2edb3d47bd3dd0fba5b34d8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 320557
+  packageName: PieTabs
+  packageVersion: 2.1.1
+  assetPath: Assets/PinePie/PieTabs/editor/Core/Scripts/Navigator.cs
+  uploadId: 833408

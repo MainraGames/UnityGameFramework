@@ -7,6 +7,7 @@ using System.IO;
 using System.Reflection;
 using UnityEditor;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace WingmanInspector {
 
@@ -99,10 +100,10 @@ namespace WingmanInspector {
         private static void SubscribeToCallbacks() {
             EditorApplication.update -= RefreshInspectorWindows;
             EditorApplication.update += RefreshInspectorWindows;
-            
+
             EditorApplication.update -= Update;
             EditorApplication.update += Update;
-            
+
             EditorApplication.hierarchyWindowItemOnGUI -= OnHierarchyGUI;
             EditorApplication.hierarchyWindowItemOnGUI += OnHierarchyGUI;
             

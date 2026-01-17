@@ -1,0 +1,33 @@
+.DarkButton {
+    background-color: rgb(60, 60, 60);
+}
+
+.DarkButton:hover {
+    background-color: rgb(71, 71, 71);
+}
+
+.DarkButton.selected {
+    background-color: rgb(87, 87, 87);
+}
+
+.splitter {
+    width: 6px;
+    background-color: rgb(136, 136, 136);
+    cursor: split-resize-left-right;
+}
+
+.clickableButton {
+    cursor: link;
+}
+
+.glowingTint {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.62);
+}
+
+.glowingTint:hover {
+    -unity-background-image-tint-color: rgba(255, 255, 255, 0.8);
+}
+
+.glowingTint.active {
+    -unity-background-image-tint-color: rgb(255, 255, 255);
+}

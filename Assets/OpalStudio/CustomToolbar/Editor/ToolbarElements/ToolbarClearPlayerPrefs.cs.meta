@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: 04138b899f084cadaef05d0ac7b56844
+timeCreated: 1752831903
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/ToolbarElements/ToolbarClearPlayerPrefs.cs
+  uploadId: 838936

@@ -1,0 +1,10 @@
+﻿fileFormatVersion: 2
+guid: c9849384696b47468645d1cf86fab060
+timeCreated: 1753372816
+AssetOrigin:
+  serializedVersion: 1
+  productId: 327041
+  packageName: CustomToolbar
+  packageVersion: 2.9.1
+  assetPath: Assets/OpalStudio/CustomToolbar/Editor/ToolbarElements/ToolbarLayerVisibility.cs
+  uploadId: 838936

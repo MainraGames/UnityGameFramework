@@ -17,8 +17,9 @@ namespace PrimeTweenDemo {
                 return Sequence.Create();
             }
             isClosed = _isClosed;
+            var sequence = Sequence.Create();
             var rotationTween = Tween.LocalRotation(animationAnchor, _isClosed ? new Vector3(0, -90) : Vector3.zero, 0.7f, Ease.InOutElastic);
-            var sequence = Sequence.Create(rotationTween);
+            sequence.Group(rotationTween);
             if (_isClosed) {
                 sequence.Group(cameraController.Shake(0.5f));
             }

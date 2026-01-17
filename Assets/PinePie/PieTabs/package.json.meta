@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 65f8d7a23e666eb44a65301f426988a6
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 320557
+  packageName: PieTabs
+  packageVersion: 2.1.1
+  assetPath: Assets/PinePie/PieTabs/package.json
+  uploadId: 833408

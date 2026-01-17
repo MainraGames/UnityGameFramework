@@ -153,7 +153,10 @@ namespace Akiba.SOCreator
             //Check Variables for Spaces
             for (int i = 0; i < variables.Count; i++)
             {
-                return variables[i].itemName.Contains(" ");
+                if (variables[i].itemName.Contains(" "))
+                {
+                    return true;
+                }
             }
 
             return false;
