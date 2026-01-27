@@ -1,4 +1,6 @@
+using Ami.BroAudio.Editor.Setting;
 using UnityEditor;
+using UnityEngine;
 
 namespace Ami.BroAudio.Editor
 {
@@ -8,16 +10,30 @@ namespace Ami.BroAudio.Editor
         {
             OnDeleteAssets(deletedAssets);
             OnReimportAsset(importedAssets);
-            if(importedAssets.Length > 0 && importedAssets[0].Contains("BroAudio"))
+
+            if(importedAssets.Length > 0)
             {
-                BroEditorUtility.FixDuplicateSoundIDs();
-                BroUserDataGenerator.CheckAndGenerateUserData(OnUserDataChecked);
+                if (importedAssets[0].Contains("BroAudio") ||
+                    importedAssets[0].Contains("Bro_Audio") ||
+                    importedAssets[0].Contains("com.ami.broaudio"))
+                {
+                    BroEditorUtility.FixDuplicateSoundIDs();
+                    BroUserDataGenerator.CheckAndGenerateUserData(OnUserDataChecked);
+                }
             }
         }
 
         private static void OnUserDataChecked()
         {
-            Setting.SetupWizardWindow.CheckAndShowForFirstSetup();
+            var editorSetting = Resources.Load<EditorSetting>(BroEditorUtility.EditorSettingPath);
+            if (!editorSetting || editorSetting.HasSetupWizardAutoLaunched)
+            {
+                return;
+            }
+            
+            SetupWizardWindow.ShowWindow();
+            editorSetting.HasSetupWizardAutoLaunched = true;
+            EditorUtility.SetDirty(editorSetting);
         }
 
         private static void OnReimportAsset(string[] importedAssets)

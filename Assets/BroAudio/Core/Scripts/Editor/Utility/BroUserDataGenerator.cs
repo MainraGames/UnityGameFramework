@@ -14,6 +14,9 @@ namespace Ami.BroAudio.Editor
     {
         private static bool _isLoading = false;
 
+        [MenuItem(MenuItem_BroAudio + "Others/Regenerate User Data")]
+        private static void RegenerateUserData() => CheckAndGenerateUserData();
+
         public static void CheckAndGenerateUserData(Action onFinished = null)
         {
             if (_isLoading)
@@ -22,38 +25,220 @@ namespace Ami.BroAudio.Editor
             }
             _isLoading = true;
 
-            var request = Resources.LoadAsync<SoundManager>(nameof(SoundManager));
-            request.completed += OnGetSoundManager;
+            ResourceRequest request;
+
+            try
+            {
+                EnsureAllResources();
+                EnsureDefaultAssetOutputPath();
+
+                request = Resources.LoadAsync<SoundManager>(nameof(SoundManager));
+                request.completed += OnGetSoundManager;
+            }
+            catch
+            {
+                _isLoading = false;
+                throw;
+            }
 
             void OnGetSoundManager(AsyncOperation operation)
             {
-                request.completed -= OnGetSoundManager;          
-                if (request.asset is SoundManager soundManager)
+                try
                 {
-                    if(TryGetCoreData(out var currentCoreData))
+                    request.completed -= OnGetSoundManager;
+                    if (request.asset is SoundManager soundManager)
                     {
-                        soundManager.AssignCoreData(currentCoreData);
-                        BroUpdater.Process(soundManager.AudioMixer, currentCoreData);
+                        if (TryGetCoreData(out var currentCoreData))
+                        {
+                            soundManager.AssignCoreData(currentCoreData);
+                            BroUpdater.Process(soundManager.AudioMixer, currentCoreData);
+                        }
+                        else
+                        {
+                            StartGeneratingUserData(soundManager);
+                        }
+                        onFinished?.Invoke();
                     }
                     else
                     {
-                        StartGeneratingUserData(soundManager);
+                        Debug.LogError(Utility.LogTitle + $"Load {nameof(SoundManager)} fail, " +
+                            $"please import it and place it in the Resources folder, and go to Tools/Preferences, switch to the last tab and hit [Regenerate User Data]");
                     }
-                    onFinished?.Invoke();
+                }
+                finally
+                {
+                    _isLoading = false;
+                }
+            }
+        }
+
+        private static void EnsureAllResources([System.Runtime.CompilerServices.CallerFilePath] string callerFilePath = "")
+        {
+            // Loop upwards and find all Resources~ directories
+            string currentPath = Path.GetDirectoryName(callerFilePath);
+            var cwd = Directory.GetCurrentDirectory();
+            int changed = 0;
+
+            // Loop until we reach the project root
+            while (!string.IsNullOrEmpty(currentPath) && (currentPath.Contains(cwd) || !Path.IsPathRooted(currentPath)))
+            {
+                var resourcesPath = Path.Combine(currentPath, "Resources~");
+
+                if (Directory.Exists(resourcesPath))
+                {
+                    changed += CopyResourcesToLocalIfNotFound(resourcesPath);
+                }
+
+                currentPath = Path.GetDirectoryName(currentPath);
+            }
+
+            if (changed > 0)
+            {
+                AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
+            }
+
+            static int CopyResourcesToLocalIfNotFound(string resourcesPath)
+            {
+                int changed = 0;
+                string targetBasePath = Path.Combine(Application.dataPath, "BroAudio");
+
+                // Copy files from Resources~/
+                changed += CopyDirectoryIfNotExists(resourcesPath, Path.Combine(targetBasePath, "Resources"));
+
+                // Copy files from Resources~/Editor/
+                string editorResourcesPath = Path.Combine(resourcesPath, "Editor");
+                if (Directory.Exists(editorResourcesPath))
+                {
+                    changed += CopyDirectoryIfNotExists(editorResourcesPath, Path.Combine(targetBasePath, "Editor", "Resources"));
+                }
+
+                return changed;
+            }
+
+            static int CopyDirectoryIfNotExists(string sourceDir, string targetDir)
+            {
+                int changed = 0;
+                var files = Directory.GetFiles(sourceDir, "*.*", SearchOption.TopDirectoryOnly);
+
+                foreach (string sourceFile in files)
+                {
+                    string fileName = Path.GetFileName(sourceFile);
+                    string targetFile = Path.Combine(targetDir, fileName);
+                    string sourceMetaFile = sourceFile + ".meta";
+                    string targetMetaFile = targetFile + ".meta";
+
+                    // Only copy if no resource with the same name exists in Resources folders
+                    if (!ResourceExistsInResourcesFolders(fileName))
+                    {
+                        if (!Directory.Exists(targetDir))
+                        {
+                            Directory.CreateDirectory(targetDir);
+                        }
+
+                        File.Copy(sourceFile, targetFile, true);
+#if BroAudio_DevOnly
+                        Debug.Log($"Copied {fileName} to {targetDir}");
+#endif
+                        changed++;
+
+                        // Copy .meta file if it exists
+                        if (File.Exists(sourceMetaFile))
+                        {
+                            File.Copy(sourceMetaFile, targetMetaFile, true);
+#if BroAudio_DevOnly
+                            Debug.Log($"Copied {fileName}.meta to {targetDir}");
+#endif
+                            changed++;
+                        }
+                    }
+                }
+
+                return changed;
+            }
+
+            static bool ResourceExistsInResourcesFolders(string fileName)
+            {
+                // Remove .asset extension if present for asset name matching
+                string assetName = Path.GetFileNameWithoutExtension(fileName);
+
+                // Search for existing assets with the same name in all Resources folders
+                string[] guids = AssetDatabase.FindAssets(assetName, new[] { "Assets" });
+
+                foreach (string guid in guids)
+                {
+                    string assetPath = AssetDatabase.GUIDToAssetPath(guid);
+                    string assetFileName = Path.GetFileName(assetPath);
+
+                    // Check if the asset is in a Resources folder and has the same name
+                    if (assetPath.Contains("/Resources/") && assetFileName.Equals(fileName, StringComparison.OrdinalIgnoreCase))
+                    {
+                        return true;
+                    }
+                }
+
+                // Not found, so do a deeper dive to see if it exists in any subfolders
+                foreach (string assetPath in Directory.EnumerateFiles("Assets", fileName, SearchOption.AllDirectories))
+                {
+                    if (assetPath.Contains("/Resources/"))
+                    {
+                        return true;
+                    }
+                }
+
+                return false;
+            }
+        }
+        
+        private static void EnsureDefaultAssetOutputPath()
+        {
+            // Determine target output path from EditorSetting if available, otherwise use default
+            string targetPath = DefaultAssetOutputPath;
+            if (TryLoadResources<EditorSetting>(EditorSettingPath, out var setting))
+            {
+                if (!string.IsNullOrWhiteSpace(setting.AssetOutputPath) && targetPath.StartsWith("Assets"))
+                {
+                    targetPath = setting.AssetOutputPath;
                 }
                 else
                 {
-                    Debug.LogError(Utility.LogTitle + $"Load {nameof(SoundManager)} fail, " +
-                        $"please import it and place it in the Resources folder, and go to Tools/Preferences, switch to the last tab and hit [Regenerate User Data]");
+                    // Ensure a value is written to the setting so future reads are consistent
+                    setting.AssetOutputPath = DefaultAssetOutputPath;
+                    EditorUtility.SetDirty(setting);
+                    AssetDatabase.SaveAssetIfDirty(setting);
                 }
-                _isLoading = false;
             }
+
+            // If folder already exists, nothing to do
+            if (AssetDatabase.IsValidFolder(targetPath))
+            {
+                return;
+            }
+
+            // Create folders recursively using AssetDatabase.CreateFolder
+            string[] segments = targetPath.Split('/');
+            if (segments.Length == 0)
+            {
+                return;
+            }
+
+            string parent = segments[0]; // should be "Assets"
+            for (int i = 1; i < segments.Length; i++)
+            {
+                string current = parent + "/" + segments[i];
+                if (!AssetDatabase.IsValidFolder(current))
+                {
+                    AssetDatabase.CreateFolder(parent, segments[i]);
+                }
+                parent = current;
+            }
+
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
         }
 
         private static void StartGeneratingUserData(SoundManager soundManager)
         {
             string resourcePath = Path.GetDirectoryName(AssetDatabase.GetAssetPath(soundManager));
-            string coreDataPath = GetAssetSavePath(resourcePath, CoreDataResourcesPath);
+            string coreDataPath = GetAssetSavePath(resourcePath, BroEditorUtility.CoreDataResourcesPath);
             var coreData = CreateCoreData(coreDataPath, out string audioAssetOutputPath);
             soundManager.AssignCoreData(coreData);
 
@@ -67,6 +252,7 @@ namespace Ami.BroAudio.Editor
             EditorUtility.SetDirty(editorSetting);
 
             AssetDatabase.SaveAssets();
+            AssetDatabase.Refresh(ImportAssetOptions.ForceUpdate);
         }
 
         private static string GetAssetSavePath(string resourcesPath, string relativePath)
@@ -124,4 +310,4 @@ namespace Ami.BroAudio.Editor
         }
     }
 #endif
-}
+    }

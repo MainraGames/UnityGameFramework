@@ -176,6 +176,7 @@ namespace Ami.BroAudio.Editor
             void OnDrawHeader(Rect rect)
             {
                 EditorGUI.LabelField(rect, "Asset List");
+                HandleDragAndDropToAssetListHeader(rect);
             }
 
             void OnAdd(ReorderableList list)
@@ -229,6 +230,39 @@ namespace Ami.BroAudio.Editor
                 {
                     ProcessDraggingClips(editor, clips);
                 }
+            }
+        }
+
+        private void HandleDragAndDropToAssetListHeader(Rect rect)
+        {
+            if (!rect.Contains(Event.current.mousePosition))
+            {
+                return;
+            }
+
+            var assets = DragAndDrop.objectReferences.OfType<AudioAsset>().ToList();
+            if (!assets.Any())
+            {
+                return;
+            }
+
+            DragAndDrop.visualMode = DragAndDropVisualMode.Generic;
+            if (Event.current.type == EventType.DragPerform)
+            {
+                foreach (var asset in assets)
+                {
+                    string guid = AssetDatabase.AssetPathToGUID(AssetDatabase.GetAssetPath(asset));
+                    if (!_allAssetGUIDs.Contains(guid))
+                    {
+                        AddNewAssetToCoreData(asset);
+                        var editor = UnityEditor.Editor.CreateEditor(asset, typeof(AudioAssetEditor)) as AudioAssetEditor;
+                        editor.Init(_idGenerator);
+                        _assetEditorDict.Add(guid, editor);
+                        _allAssetGUIDs.Add(guid);
+                    }
+                }
+                DragAndDrop.AcceptDrag();
+                Repaint();
             }
         }
 
@@ -312,9 +346,27 @@ namespace Ami.BroAudio.Editor
 
         private AudioAssetEditor CreateAsset(string entityName)
         {
-            if (!TryGetNewPath(entityName, out string path, out string fileName))
+            if (!_hasOutputAssetPath && !ValidateAndSetAssetOutputPath())
             {
                 return null;
+            }
+
+            string path;
+            string fileName;
+
+            if (EditorSetting.PromptForPathOnAssetCreation)
+            {
+                if (!PromptForAssetPath(entityName, out path, out fileName))
+                {
+                    return null;
+                }
+            }
+            else
+            {
+                if (!TryGetNewPath(entityName, out path, out fileName))
+                {
+                    return null;
+                }
             }
 
             var newAsset = ScriptableObject.CreateInstance(typeof(AudioAsset));
@@ -332,6 +384,37 @@ namespace Ami.BroAudio.Editor
 
             _assetReorderableList.index = _assetReorderableList.count - 1;
             return editor;
+        }
+
+        private bool ValidateAndSetAssetOutputPath()
+        {
+            if (!EditorUtility.DisplayDialog(
+                    "Asset Output Folder Not Found",
+                    $"The configured asset output folder doesn't exist:\n\n{AssetOutputPath}\n\nPlease select a new folder to save audio assets. It will be used for all future audio asset creations.",
+                    "OK",
+                    "Cancel"))
+            {
+                return false;
+            }
+
+            string selectedPath = EditorUtility.OpenFolderPanel("Select Asset Output Folder", "Assets", "");
+            if (string.IsNullOrEmpty(selectedPath))
+            {
+                return false;
+            }
+
+            string relativePath = FileUtil.GetProjectRelativePath(selectedPath);
+            _hasOutputAssetPath = Directory.Exists(relativePath);
+            if (!_hasOutputAssetPath)
+            {
+                Debug.LogError(Utility.LogTitle +
+                    $"Failed to set asset output path. Please ensure the selected folder is within the project.");
+                return false;
+            }
+            
+            EditorSetting.AssetOutputPath = relativePath;
+            EditorUtility.SetDirty(EditorSetting);
+            return true;
         }
 
         private bool TryGetNewPath(string entityName, out string path, out string result)
@@ -357,18 +440,40 @@ namespace Ami.BroAudio.Editor
                 return GetFilePath(AssetOutputPath, fileName + ".asset");
             }
         }
+
+        private bool PromptForAssetPath(string entityName, out string path, out string fileName)
+        {
+            path = string.Empty;
+            fileName = entityName;
+
+            string directory = string.IsNullOrEmpty(AssetOutputPath) ? "Assets" : AssetOutputPath;
+            string absolutePath = EditorUtility.SaveFilePanel(
+                "Save Audio Asset",
+                directory,
+                entityName,
+                "asset");
+
+            if (string.IsNullOrEmpty(absolutePath))
+            {
+                return false;
+            }
+
+            path = FileUtil.GetProjectRelativePath(absolutePath);
+            if (string.IsNullOrEmpty(path))
+            {
+                Debug.LogError(Utility.LogTitle + "Selected path must be within the project folder.");
+                return false;
+            }
+
+            fileName = Path.GetFileNameWithoutExtension(path);
+            return true;
+        }
         #endregion
 
         #region GUI Drawing
         private void OnGUI()
         {
             _verticalGapDrawer.DrawLineCount = 0;
-
-            if (!_hasOutputAssetPath)
-            {
-                DrawAssetOutputPath();
-                return;
-            }
 
             EditorGUILayout.BeginHorizontal();
             {
@@ -389,17 +494,6 @@ namespace Ami.BroAudio.Editor
                 }
             }
             EditorGUILayout.EndHorizontal();
-        }
-
-        private void DrawAssetOutputPath()
-        {
-            EditorGUILayout.Space();
-            EditorGUILayout.LabelField(AssetOutputPathLabel.ToBold(), GUIStyleHelper.MiddleCenterRichText);
-            Vector2 halfLineSize = new Vector2(position.width * 0.5f, EditorGUIUtility.singleLineHeight);
-            Rect helpBoxRect = GUILayoutUtility.GetRect(halfLineSize.x, EditorGUIUtility.singleLineHeight * 2).GetHorizontalCenterRect(halfLineSize.x, EditorGUIUtility.singleLineHeight * 2);
-            RichTextHelpBox(helpBoxRect, AssetOutputPathMissing, MessageType.Error);
-            Rect assetOutputRect = GUILayoutUtility.GetRect(halfLineSize.x, halfLineSize.y).GetHorizontalCenterRect(halfLineSize.x, halfLineSize.y);
-            BroEditorUtility.DrawAssetOutputPath(assetOutputRect, _instruction, () => _hasOutputAssetPath = true);
         }
 
         private void DrawAssetList(Rect assetListRect)
@@ -638,6 +732,12 @@ namespace Ami.BroAudio.Editor
                 }
                 EditorUtility.SetDirty(EditorSetting);
             });
+            menu.AddItem(new GUIContent(PreferencesDrawer.PromptForPathOnAssetCreationLabel), EditorSetting.PromptForPathOnAssetCreation,
+                () =>
+                {
+                    EditorSetting.PromptForPathOnAssetCreation = !EditorSetting.PromptForPathOnAssetCreation;
+                    EditorUtility.SetDirty(EditorSetting);
+                });
         }
     }
 }

@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: 4b27c3682c9e2d6b5a9b4036bc9fbbe5
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 322424
+  packageName: Smooth Scene Camera
+  packageVersion: 1.0.4
+  assetPath: Assets/SmoothSceneCamera/Third-Party Notices.txt
+  uploadId: 808924

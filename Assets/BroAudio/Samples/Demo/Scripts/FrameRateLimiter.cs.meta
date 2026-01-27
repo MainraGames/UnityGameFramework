@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 7e92d190d2747fd4e8dcc2db13fd4de5
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 257362
+  packageName: Bro Audio
+  packageVersion: 2.2.2
+  assetPath: Assets/BroAudio/Samples/Demo/Scripts/FrameRateLimiter.cs
+  uploadId: 841506

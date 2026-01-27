@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: edf29ea7508e1bc468a066b67d50f8e8
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 257362
+  packageName: Bro Audio
+  packageVersion: 2.2.2
+  assetPath: Assets/BroAudio/Editor/DevTools/TildeFolderImporter.cs
+  uploadId: 841506

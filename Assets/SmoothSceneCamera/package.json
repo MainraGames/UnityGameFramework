@@ -1,0 +1,25 @@
+{
+	"name": "com.nnra6864.smoothscenecamera",
+	"version": "1.0.4",
+	"displayName": "Smooth Scene Camera",
+	"description": "This asset brings what every major engine has to Unity: smooth scene camera zoom.",
+	"keywords": [
+		"camera",
+		"smooth camera",
+		"scene camera",
+		"editor",
+		"navigation",
+		"smooth",
+		"zoom",
+		"smooth zoom"
+	],
+	"author": {
+		"name": "nnra6864",
+		"email": "nnra2210@gmail.com",
+		"url": "https://nnra6864.github.io/nnra/"
+	},
+	"type": "tool",
+	"dependencies": {
+		"com.unity.editorcoroutines": "1.0.0"
+	}
+}

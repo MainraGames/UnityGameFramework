@@ -8,6 +8,7 @@ using UnityEditorInternal;
 using UnityEngine;
 using UnityEngine.Audio;
 using Ami.BroAudio.Data;
+using Ami.BroAudio.Editor;
 #if UNITY_2022_3_OR_NEWER
 using UnityEditor.Build;
 #endif
@@ -27,8 +28,6 @@ namespace Ami.BroAudio.Editor.Setting
         private const float Gap = 50f;
         public const string ResetSettingButtonText = "Reset To Factory Settings";
         public const string AutoMatchTracksButtonText = "Auto-adding tracks to match audio voices.";
-        public const string AssetOutputPathLabel = "Asset Output Path";
-        public const string AssetOutputPathMissing = "The current audio asset output path is missing. Please select a new location.";
         public const string ShowPlayButtonWhenCollapsed = "Show play button when the entity is collapsed in Library Manager";
         public const string OpenLastEditedAssetLabel = "Open last edited asset when Library Manager launches";
         public const string VUColorToggleLabel = "Show VU color on volume slider";
@@ -77,10 +76,20 @@ namespace Ami.BroAudio.Editor.Setting
             {
                 if (!_mixer)
                 {
-                    string[] mixerGUIDs = AssetDatabase.FindAssets(MixerName);
-                    if (mixerGUIDs != null && mixerGUIDs.Length > 0)
+                    string[] mixerGUIDs = AssetDatabase.FindAssets($"{MixerName} t:{nameof(UnityEngine.Audio.AudioMixer)}");
+
+                    if (mixerGUIDs != null)
                     {
-                        _mixer = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(mixerGUIDs[0]), typeof(AudioMixer)) as AudioMixer;
+                        foreach (string guid in mixerGUIDs)
+                        {
+                            var mixer = AssetDatabase.LoadAssetAtPath(AssetDatabase.GUIDToAssetPath(guid), typeof(AudioMixer)) as AudioMixer;
+
+                            if (mixer != null && mixer.name == MixerName)
+                            {
+                                _mixer = mixer;
+                                break;
+                            }
+                        }
                     }
                 }
                 return _mixer;
@@ -410,7 +419,11 @@ namespace Ami.BroAudio.Editor.Setting
 
         private void DrawMiscellaneousSetting(Rect drawPosition)
         {
-            DrawAssetOutputPath(drawPosition);
+            using (NewSection(PreferencesDrawer.AssetOutputPathLabel, GetRectAndIterateLine(drawPosition)))
+            {
+                _preferenceDrawer.DrawAssetOutputPath(() => GetRectAndIterateLine(drawPosition), _hasOutputAssetPath, _instruction,
+                    () => _hasOutputAssetPath = Directory.Exists(BroEditorUtility.AssetOutputPath));
+            }
             DrawEmptyLine(1);
 
 #if PACKAGE_ADDRESSABLES
@@ -479,19 +492,6 @@ namespace Ami.BroAudio.Editor.Setting
                 ScriptingDefinesUtility.AddManualInitScriptingDefineSymbol();
 #endif
             }
-        }
-
-        private void DrawAssetOutputPath(Rect drawPosition)
-        {
-            EditorGUI.LabelField(GetRectAndIterateLine(drawPosition), AssetOutputPathLabel, GUIStyleHelper.MiddleCenterRichText);
-            if(!_hasOutputAssetPath)
-            {
-                RichTextHelpBox(GetRectAndIterateLine(drawPosition).GetHorizontalCenterRect(drawPosition.width * 0.7f, SingleLineSpace *2), AssetOutputPathMissing, MessageType.Error);
-                DrawEmptyLine(1);
-            }
-
-            Rect rect = GetRectAndIterateLine(drawPosition).GetHorizontalCenterRect(drawPosition.width * 0.7f, SingleLineSpace);
-            BroEditorUtility.DrawAssetOutputPath(rect, _instruction, () => _hasOutputAssetPath = true);
         }
     }
 }

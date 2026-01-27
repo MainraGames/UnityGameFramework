@@ -1,0 +1,14 @@
+fileFormatVersion: 2
+guid: a5bda2b2fb6abe310a09081263e7a3c0
+TextScriptImporter:
+  externalObjects: {}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 322424
+  packageName: Smooth Scene Camera
+  packageVersion: 1.0.4
+  assetPath: Assets/SmoothSceneCamera/package.json
+  uploadId: 808924

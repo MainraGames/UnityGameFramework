@@ -1,0 +1,9 @@
+fileFormatVersion: 2
+guid: d387621a082b9bc1cb7b7e599290e519
+AssetOrigin:
+  serializedVersion: 1
+  productId: 322424
+  packageName: Smooth Scene Camera
+  packageVersion: 1.0.4
+  assetPath: Assets/SmoothSceneCamera/Easings.cs
+  uploadId: 808924
