@@ -1,0 +1,80 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 1c11aff76c34d4f49befff9ac089ad26, type: 3}
+  m_Name: GameSettingsSaveObject
+  m_EditorClassIdentifier: Assembly-CSharp::Save.GameSettingsSaveObject
+  isExpanded: 0
+  saveKey: 8634504e-b3c9-4b62-85e4-1dd66ba0fe30
+  masterVolume:
+    key: settings_masterVolume
+    value: 0
+    defaultValue: 1
+  musicVolume:
+    key: settings_musicVolume
+    value: 0
+    defaultValue: 1
+  sfxVolume:
+    key: settings_sfxVolume
+    value: 0
+    defaultValue: 1
+  voiceVolume:
+    key: settings_voiceVolume
+    value: 0
+    defaultValue: 1
+  ambientVolume:
+    key: settings_ambientVolume
+    value: 0
+    defaultValue: 1
+  muteAudio:
+    key: settings_muteAudio
+    value: 0
+    defaultValue: 0
+  qualityLevel:
+    key: settings_qualityLevel
+    value: 0
+    defaultValue: 2
+  fullScreen:
+    key: settings_fullScreen
+    value: 0
+    defaultValue: 1
+  resolutionIndex:
+    key: settings_resolutionIndex
+    value: 0
+    defaultValue: 0
+  targetFrameRate:
+    key: settings_targetFrameRate
+    value: 0
+    defaultValue: 60
+  vSync:
+    key: settings_vSync
+    value: 0
+    defaultValue: 1
+  antiAliasing:
+    key: settings_antiAliasing
+    value: 0
+    defaultValue: 2
+  shadowQuality:
+    key: settings_shadowQuality
+    value: 0
+    defaultValue: 2
+  textureQuality:
+    key: settings_textureQuality
+    value: 0
+    defaultValue: 0
+  brightness:
+    key: settings_brightness
+    value: 0
+    defaultValue: 1
+  gamma:
+    key: settings_gamma
+    value: 0
+    defaultValue: 1
