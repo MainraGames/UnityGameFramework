@@ -1,7 +1,15 @@
 fileFormatVersion: 2
-guid: f4ea21621a13fcd4280f49c134f803e7
+guid: 1d32d19a5bb83cb46bba6909272424c7
 TextScriptImporter:
   externalObjects: {}
   userData: 
   assetBundleName: 
   assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 205184
+  packageName: Build Versions | CG
+  packageVersion: 1.2.3
+  assetPath: Assets/Carter Games/Build Versions/~Documentation/Carter Games - Build
+    Versions - 1.2.0 - 1.2.2 Documentation.html
+  uploadId: 848922
