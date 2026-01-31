@@ -1,11 +1,17 @@
+using _Game.Scripts.Presentation.UI;
 using VContainer;
 using VContainer.Unity;
-using _Game.Scripts.Presentation.UI;
 
-public class SplashScreenLifetimeScope : LifetimeScope
+namespace _Game.Scripts.LifetimeScope
 {
-    protected override void Configure(IContainerBuilder builder)
+    /// <summary>
+    /// Dependency injection container for the Splash Screen scene.
+    /// </summary>
+    public class SplashScreenLifetimeScope : VContainer.Unity.LifetimeScope
     {
-        builder.RegisterComponentInHierarchy<SplashScreenUI>();
+        protected override void Configure(IContainerBuilder builder)
+        {
+            builder.RegisterComponentInHierarchy<SplashScreenUI>();
+        }
     }
 }

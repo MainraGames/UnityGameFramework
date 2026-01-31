@@ -16,5 +16,5 @@ MonoBehaviour:
   defaultSavePathWeb: /idbfs/%productName%-%companyName%/save.sf
   saveDataAsset: {fileID: 0}
   encryptionOption: 0
-  prettify: 0
+  prettify: 1
   autoSaveOnExit: 1

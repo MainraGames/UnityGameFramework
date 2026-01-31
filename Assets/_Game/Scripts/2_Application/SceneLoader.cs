@@ -8,8 +8,12 @@ using _Game.Scripts.GameConfiguration;
 namespace _Game.Scripts.Application
 {
     /// <summary>
-    /// Class for managing scene loading and unloading with comprehensive features.
+    /// Service for managing scene loading and unloading with comprehensive features.
     /// </summary>
+    /// <remarks>
+    /// Implements ISceneLoader and provides memory management, loading screen support,
+    /// and async loading capabilities.
+    /// </remarks>
     public class SceneLoader : ISceneLoader
     {
         private const string LOG_PREFIX = "[SceneLoader]";
@@ -39,26 +43,28 @@ namespace _Game.Scripts.Application
         #region Basic Scene Loading
 
         /// <inheritdoc />
-        public void LoadScene(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool unloadUnusedAssets = false)
+        public void LoadScene(string sceneName, SceneLoadMode loadMode = SceneLoadMode.Single, bool unloadUnusedAssets = false)
         {
             ValidateSceneName(sceneName);
-            LogLoading(sceneName, loadMode);
+            var unityLoadMode = ConvertToUnityLoadMode(loadMode);
+            LogLoading(sceneName, unityLoadMode);
 
-            SceneManager.LoadScene(sceneName, loadMode);
+            SceneManager.LoadScene(sceneName, unityLoadMode);
             TrackLoadedScene(sceneName);
             HandleUnloadUnusedAssets(unloadUnusedAssets);
             CheckAndManageMemory();
         }
 
         /// <inheritdoc />
-        public AsyncOperation LoadSceneAsync(string sceneName, LoadSceneMode loadMode = LoadSceneMode.Single, bool unloadUnusedAssets = false)
+        public void LoadSceneAsync(string sceneName, SceneLoadMode loadMode = SceneLoadMode.Single, bool unloadUnusedAssets = false)
         {
             ValidateSceneName(sceneName);
-            LogLoading(sceneName, loadMode, true);
+            var unityLoadMode = ConvertToUnityLoadMode(loadMode);
+            LogLoading(sceneName, unityLoadMode, true);
 
             _isLoading = true;
             _currentLoadingSceneName = sceneName;
-            _currentLoadingOperation = SceneManager.LoadSceneAsync(sceneName, loadMode);
+            _currentLoadingOperation = SceneManager.LoadSceneAsync(sceneName, unityLoadMode);
             _currentLoadingOperation.allowSceneActivation = false;
             
             SetupAsyncOperation(_currentLoadingOperation, unloadUnusedAssets);
@@ -67,19 +73,17 @@ namespace _Game.Scripts.Application
                 TrackLoadedScene(sceneName);
                 CheckAndManageMemory();
             };
-
-            return _currentLoadingOperation;
         }
 
         /// <inheritdoc />
-        public void LoadNextScene(LoadSceneMode loadMode = LoadSceneMode.Single, bool unloadUnusedAssets = false)
+        public void LoadNextScene(SceneLoadMode loadMode = SceneLoadMode.Single, bool unloadUnusedAssets = false)
         {
             int nextSceneIndex = GetNextSceneIndex();
             LoadSceneByBuildIndex(nextSceneIndex, loadMode, unloadUnusedAssets);
         }
 
         /// <inheritdoc />
-        public void LoadPreviousScene(LoadSceneMode loadMode = LoadSceneMode.Single, bool unloadUnusedAssets = false)
+        public void LoadPreviousScene(SceneLoadMode loadMode = SceneLoadMode.Single, bool unloadUnusedAssets = false)
         {
             int previousSceneIndex = GetPreviousSceneIndex();
             LoadSceneByBuildIndex(previousSceneIndex, loadMode, unloadUnusedAssets);
@@ -89,7 +93,7 @@ namespace _Game.Scripts.Application
         public void ReloadScene(bool unloadUnusedAssets = false)
         {
             string currentSceneName = GetActiveSceneName();
-            LoadScene(currentSceneName, LoadSceneMode.Single, unloadUnusedAssets);
+            LoadScene(currentSceneName, SceneLoadMode.Single, unloadUnusedAssets);
         }
 
         #endregion
@@ -97,30 +101,30 @@ namespace _Game.Scripts.Application
         #region Build Index Loading
 
         /// <inheritdoc />
-        public void LoadSceneByBuildIndex(int buildIndex, LoadSceneMode loadMode = LoadSceneMode.Single, bool unloadUnusedAssets = false)
+        public void LoadSceneByBuildIndex(int buildIndex, SceneLoadMode loadMode = SceneLoadMode.Single, bool unloadUnusedAssets = false)
         {
             ValidateBuildIndex(buildIndex);
-            LogLoadingByIndex(buildIndex, loadMode);
+            var unityLoadMode = ConvertToUnityLoadMode(loadMode);
+            LogLoadingByIndex(buildIndex, unityLoadMode);
 
-            SceneManager.LoadScene(buildIndex, loadMode);
+            SceneManager.LoadScene(buildIndex, unityLoadMode);
             HandleUnloadUnusedAssets(unloadUnusedAssets);
         }
 
         /// <inheritdoc />
-        public AsyncOperation LoadSceneByBuildIndexAsync(int buildIndex, LoadSceneMode loadMode = LoadSceneMode.Single, bool unloadUnusedAssets = false)
+        public void LoadSceneByBuildIndexAsync(int buildIndex, SceneLoadMode loadMode = SceneLoadMode.Single, bool unloadUnusedAssets = false)
         {
             ValidateBuildIndex(buildIndex);
-            LogLoadingByIndex(buildIndex, loadMode, true);
+            var unityLoadMode = ConvertToUnityLoadMode(loadMode);
+            LogLoadingByIndex(buildIndex, unityLoadMode, true);
 
             _isLoading = true;
             _currentLoadingSceneName = SceneManager.GetSceneByBuildIndex(buildIndex).name;
-            _currentLoadingOperation = SceneManager.LoadSceneAsync(buildIndex, loadMode);
+            _currentLoadingOperation = SceneManager.LoadSceneAsync(buildIndex, unityLoadMode);
             _currentLoadingOperation.allowSceneActivation = false;
             
             SetupAsyncOperation(_currentLoadingOperation, unloadUnusedAssets);
             _currentLoadingOperation.completed += OnLoadingCompleted;
-
-            return _currentLoadingOperation;
         }
 
         #endregion
@@ -139,7 +143,7 @@ namespace _Game.Scripts.Application
         }
 
         /// <inheritdoc />
-        public AsyncOperation UnloadSceneAsync(string sceneName, bool unloadUnusedAssets = false)
+        public void UnloadSceneAsync(string sceneName, bool unloadUnusedAssets = false)
         {
             ValidateSceneName(sceneName);
             var scene = GetSceneByName(sceneName);
@@ -147,8 +151,6 @@ namespace _Game.Scripts.Application
             LogUnloading(sceneName, true);
             var operation = SceneManager.UnloadSceneAsync(scene);
             SetupAsyncOperation(operation, unloadUnusedAssets);
-
-            return operation;
         }
 
         #endregion
@@ -219,14 +221,14 @@ namespace _Game.Scripts.Application
         }
 
         /// <inheritdoc />
-        public AsyncOperation LoadSceneThroughLoadingAsync(string targetSceneName, string loadingSceneName = "Loading")
+        public void LoadSceneThroughLoadingAsync(string targetSceneName, string loadingSceneName = "Loading")
         {
             ValidateSceneName(targetSceneName);
             ValidateSceneName(loadingSceneName);
 
             _targetSceneName = targetSceneName;
             _targetBuildIndex = -1;
-            return LoadSceneAsync(loadingSceneName);
+            LoadSceneAsync(loadingSceneName);
         }
 
         /// <inheritdoc />
@@ -241,14 +243,14 @@ namespace _Game.Scripts.Application
         }
 
         /// <inheritdoc />
-        public AsyncOperation LoadSceneThroughLoadingByIndexAsync(int targetBuildIndex, string loadingSceneName = "Loading")
+        public void LoadSceneThroughLoadingByIndexAsync(int targetBuildIndex, string loadingSceneName = "Loading")
         {
             ValidateBuildIndex(targetBuildIndex);
             ValidateSceneName(loadingSceneName);
 
             _targetBuildIndex = targetBuildIndex;
             _targetSceneName = string.Empty;
-            return LoadSceneAsync(loadingSceneName);
+            LoadSceneAsync(loadingSceneName);
         }
 
         /// <inheritdoc />
@@ -265,7 +267,7 @@ namespace _Game.Scripts.Application
         }
 
         /// <inheritdoc />
-        public AsyncOperation ReloadSceneThroughLoadingAsync(string loadingSceneName = "Loading")
+        public void ReloadSceneThroughLoadingAsync(string loadingSceneName = "Loading")
         {
             ValidateSceneName(loadingSceneName);
             
@@ -274,24 +276,23 @@ namespace _Game.Scripts.Application
             _targetBuildIndex = -1;
             
             LogReloading(_targetSceneName, true);
-            return LoadSceneAsync(loadingSceneName);
+            LoadSceneAsync(loadingSceneName);
         }
 
         /// <inheritdoc />
-        public AsyncOperation LoadTargetSceneAsync()
+        public void LoadTargetSceneAsync()
         {
             if (!string.IsNullOrEmpty(_targetSceneName))
             {
-                return LoadSceneAsync(_targetSceneName);
+                LoadSceneAsync(_targetSceneName);
             }
             else if (_targetBuildIndex >= 0)
             {
-                return LoadSceneByBuildIndexAsync(_targetBuildIndex);
+                LoadSceneByBuildIndexAsync(_targetBuildIndex);
             }
             else
             {
                 Debug.LogError($"{LOG_PREFIX} No target scene to load");
-                return null;
             }
         }
 
@@ -498,6 +499,14 @@ namespace _Game.Scripts.Application
         private void LogReloading(string sceneName, bool isAsync = false)
         {
             Debug.Log($"{LOG_PREFIX} Reloading scene {(isAsync ? "asynchronously" : "")}: {sceneName}");
+        }
+
+        /// <summary>
+        /// Converts Core SceneLoadMode to Unity LoadSceneMode.
+        /// </summary>
+        private LoadSceneMode ConvertToUnityLoadMode(SceneLoadMode loadMode)
+        {
+            return loadMode == SceneLoadMode.Single ? LoadSceneMode.Single : LoadSceneMode.Additive;
         }
 
         #endregion

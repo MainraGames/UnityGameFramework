@@ -1,12 +1,15 @@
-using UnityEngine;
-using UnityEngine.UI;
-using TMPro;
 using _Game.Scripts.Core.Interfaces;
 using _Game.Scripts.Core.Enums;
+using TMPro;
+using UnityEngine;
+using UnityEngine.UI;
 using VContainer;
 
 namespace _Game.Scripts.Presentation.UI
 {
+    /// <summary>
+    /// Manages the loading screen UI and progress display.
+    /// </summary>
     public class LoadingSceneManager : MonoBehaviour
     {
         [Header("References")]
@@ -47,11 +50,7 @@ namespace _Game.Scripts.Presentation.UI
             _loadingText.text = "Loading...";
             
             // Mulai loading scene target
-            var operation = _sceneLoader.LoadTargetSceneAsync();
-            if (operation != null)
-            {
-                operation.allowSceneActivation = false;
-            }
+            _sceneLoader.LoadTargetSceneAsync();
         }
 
         private void UpdateLoadingProgress()

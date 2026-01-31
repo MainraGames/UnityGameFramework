@@ -13,4 +13,5 @@ MonoBehaviour:
   m_Name: '[Save Manager] Save Data Asset'
   m_EditorClassIdentifier: CarterGames.SaveManager.Runtime::CarterGames.Assets.SaveManager.SaveData
   saveData:
+  - {fileID: 11400000, guid: 70044f7776013fb4ea2d486c41378bf6, type: 2}
   - {fileID: 11400000, guid: 82e2e69aec1bee748b7a19fdff4d4e9a, type: 2}

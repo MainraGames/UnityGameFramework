@@ -11,9 +11,12 @@ MonoBehaviour:
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 333840ffd80a4c846a67450ce9700e91, type: 3}
   m_Name: '[Save Manager] Asset Index'
-  m_EditorClassIdentifier: 
+  m_EditorClassIdentifier: CarterGames.SaveManager.Runtime::CarterGames.Assets.SaveManager.AssetIndex
   assets:
     list:
+    - key: _Game.Scripts.GameConfiguration.GameSettingsSaveObject
+      value:
+      - {fileID: 11400000, guid: 70044f7776013fb4ea2d486c41378bf6, type: 2}
     - key: CarterGames.Assets.SaveManager.EncryptionKeyAsset
       value:
       - {fileID: 11400000, guid: 958a5953ac3f48b44831b4c705894b76, type: 2}

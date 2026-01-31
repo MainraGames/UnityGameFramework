@@ -2,10 +2,16 @@ using _Game.Scripts.Presentation.UI;
 using VContainer;
 using VContainer.Unity;
 
-public class MenuLifetimeScope : LifetimeScope
+namespace _Game.Scripts.LifetimeScope
 {
-    protected override void Configure(IContainerBuilder builder)
+    /// <summary>
+    /// Dependency injection container for the Main Menu scene.
+    /// </summary>
+    public class MenuLifetimeScope : VContainer.Unity.LifetimeScope
     {
-        builder.RegisterComponentInHierarchy<MainMenuUI>();
+        protected override void Configure(IContainerBuilder builder)
+        {
+            builder.RegisterComponentInHierarchy<MainMenuUI>();
+        }
     }
 }

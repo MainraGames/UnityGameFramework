@@ -5,18 +5,6 @@ Project ini menggunakan **Clean Architecture / Layered Architecture** yang dises
 
 ---
 
-## 📚 Dokumentasi Terkait
-
-| Dokumen | Deskripsi |
-|---------|-----------|
-| [ARCHITECTURE.md](./ARCHITECTURE.md) | Overview arsitektur (dokumen ini) |
-| [CODING_STANDARDS.md](./CODING_STANDARDS.md) | Standar penulisan kode, naming conventions, XML docs |
-| [0_Infrastructure/README.md](./0_Infrastructure/README.md) | Dokumentasi layer Infrastructure |
-| [1_Core/README.md](./1_Core/README.md) | Dokumentasi layer Core/Domain |
-| [2_Application/README.md](./2_Application/README.md) | Dokumentasi layer Application |
-| [3_Presentation/README.md](./3_Presentation/README.md) | Dokumentasi layer Presentation |
-
----
 
 ## 📁 Struktur Folder
 

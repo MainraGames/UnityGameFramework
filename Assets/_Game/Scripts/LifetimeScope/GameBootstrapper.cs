@@ -1,28 +1,35 @@
 using _Game.Scripts.Core.Interfaces;
-using _Game.Scripts.GameConfiguration;
+using _Game.Scripts._2_Application.Services;
 using UnityEngine;
 using VContainer.Unity;
 using MainraFramework.Parameter;
-using VContainer;
 
-public class GameBootstrapper : IInitializable
+namespace _Game.Scripts.LifetimeScope
 {
-    
-    private readonly ISceneLoader _sceneLoader;
-    private readonly IGameStateService _gameStateService;
-    
-    [Inject] private GameConfig gameConfig;
-
-    public GameBootstrapper(ISceneLoader sceneLoader, IGameStateService gameStateService)
+    /// <summary>
+    /// Entry point for the game application.
+    /// </summary>
+    public class GameBootstrapper : IInitializable
     {
-        _sceneLoader = sceneLoader;
-        _gameStateService = gameStateService;
-    }
+        private readonly ISceneLoader _sceneLoader;
+        private readonly IGameStateService _gameStateService;
+        private readonly GameSettingsService _gameSettingsService;
 
-    public void Initialize()
-    {
-        Application.targetFrameRate = gameConfig.GameSettings.targetFrameRate;
-        QualitySettings.vSyncCount = gameConfig.GameSettings.vSync ? 1 : 0;
-        _sceneLoader.LoadScene(Parameter.Scenes.SPLASHSCREEN);
+        public GameBootstrapper(
+            ISceneLoader sceneLoader, 
+            IGameStateService gameStateService,
+            GameSettingsService gameSettingsService)
+        {
+            _sceneLoader = sceneLoader;
+            _gameStateService = gameStateService;
+            _gameSettingsService = gameSettingsService;
+        }
+
+        public void Initialize()
+        {
+            // Settings are applied by GameSettingsService.Initialize() which runs before this
+            // Additional game-specific initialization can be done here if needed
+            _sceneLoader.LoadScene(Parameter.Scenes.SPLASHSCREEN);
+        }
     }
 }

@@ -13,6 +13,7 @@ Layer **Application** adalah layer yang mengatur **alur aplikasi** dan **use cas
 4. **Initializers** - Setup dan bootstrap logic
 5. **State Management** - Game state management
 6. **Event Aggregator** - Pub/Sub untuk komunikasi antar module
+7. **Interfaces** - Interfaces yang memerlukan Unity types (seperti ISceneLoader)
 
 ---
 
@@ -23,6 +24,8 @@ Layer **Application** adalah layer yang mengatur **alur aplikasi** dan **use cas
 ├── EventAggregator.cs      → Pub/Sub event system
 ├── GameStateService.cs     → State management
 ├── SceneLoader.cs          → Scene management
+├── Interfaces/             → Interfaces dengan Unity dependencies
+│   └── ISceneLoader.cs     → Scene loader interface
 ├── Factories/              → Object creation
 │   ├── EnemyFactory.cs
 │   └── ItemFactory.cs
@@ -40,6 +43,16 @@ Layer **Application** adalah layer yang mengatur **alur aplikasi** dan **use cas
 
 ---
 
+## ⚠️ Catatan tentang Interfaces
+
+Beberapa interfaces ditempatkan di Application layer (bukan Core) karena:
+- Menggunakan Unity types seperti `AsyncOperation`, `LoadSceneMode`
+- Core layer harus 100% pure C# tanpa Unity dependencies
+
+Contoh: `ISceneLoader` ada di `2_Application/Interfaces/` karena menggunakan Unity's `AsyncOperation` dan `LoadSceneMode`.
+
+---
+
 ## ✅ Aturan Layer Ini
 
 ### Boleh (✅):
@@ -48,6 +61,7 @@ Layer **Application** adalah layer yang mengatur **alur aplikasi** dan **use cas
 - Menggunakan Unity API (SceneManager, dll)
 - Mengimplementasikan use cases
 - Mengatur alur aplikasi
+- Mendefinisikan interfaces yang memerlukan Unity types
 
 ### Tidak Boleh (❌):
 - Mengakses `3_Presentation` ❌

@@ -1,14 +1,16 @@
+using _Game.Scripts.Core.Interfaces;
 using _Game.Scripts.Core.Enums;
+using MainraFramework.Parameter;
 using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
-using _Game.Scripts.Core.Interfaces;
-using MainraFramework.Parameter;
 using VContainer;
 
 namespace _Game.Scripts.Presentation.UI
-
 {
+	/// <summary>
+	/// Handles the main menu user interface.
+	/// </summary>
 	public class MainMenuUI : BaseUI
 	{
 		[BoxGroup("Buttons")]

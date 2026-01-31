@@ -1,23 +1,23 @@
-using UnityEngine;
 using _Game.Scripts.Core.Interfaces;
+using UnityEngine;
 using VContainer;
 
-public class GameplayTest : MonoBehaviour
+namespace _Game.Scripts.Test
 {
-    [Inject] private ISceneLoader _sceneLoader;
-
-
-
-
-    // Start is called once before the first execution of Update after the MonoBehaviour is created
-    void Start()
+    /// <summary>
+    /// Test class for gameplay functionality.
+    /// </summary>
+    public class GameplayTest : MonoBehaviour
     {
-        //_sceneLoader.ReloadSceneThroughLoading();
-    }
+        [Inject] private ISceneLoader _sceneLoader;
 
-    // Update is called once per frame
-    void Update()
-    {
-        
+        void Start()
+        {
+            //_sceneLoader.ReloadSceneThroughLoading();
+        }
+
+        void Update()
+        {
+        }
     }
 }

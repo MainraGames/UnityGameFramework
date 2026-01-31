@@ -9,9 +9,11 @@ using UnityEngine.EventSystems;
 using UnityEngine.InputSystem;
 #endif
 
-[RequireComponent(typeof(CanvasGroup))]
-public abstract class BaseUI : MonoBehaviour
+namespace _Game.Scripts.Presentation.UI
 {
+    [RequireComponent(typeof(CanvasGroup))]
+    public abstract class BaseUI : MonoBehaviour
+    {
     private CanvasGroup canvasGroup;
     private RectTransform rectTransform;
     private Sequence currentSequence;
@@ -554,4 +556,5 @@ public abstract class BaseUI : MonoBehaviour
         }
         CancelTransition();
     }
+}
 }

@@ -1,37 +1,46 @@
 using _Game.Scripts.Application;
 using _Game.Scripts.Core.Interfaces;
 using _Game.Scripts.GameConfiguration;
+using _Game.Scripts._2_Application.Services;
 using UnityEngine;
 using VContainer;
 using VContainer.Unity;
 
-public class GameLifetimeScope : LifetimeScope
+namespace _Game.Scripts.LifetimeScope
 {
-    [SerializeField] private GameConfig _gameConfig;
-
-    protected override void Configure(IContainerBuilder builder)
+    /// <summary>
+    /// Main dependency injection container for the game.
+    /// </summary>
+    public class GameLifetimeScope : VContainer.Unity.LifetimeScope
     {
-        builder.RegisterEntryPoint<GameBootstrapper>();
+        [SerializeField] private GameConfig _gameConfig;
+        [SerializeField] private GameSettingsSaveObject _gameSettingsSaveObject;
 
+        protected override void Configure(IContainerBuilder builder)
+        {
+            builder.RegisterEntryPoint<GameBootstrapper>();
 
-        // Core Layer
-        builder.Register<EventAggregator>(Lifetime.Singleton).As<IEventAggregator>();
-        builder.Register<IGameStateService, GameStateService>(Lifetime.Singleton);
-        
-        // Scene Management
-        builder.Register<ISceneLoader, SceneLoader>(Lifetime.Singleton);
-        
+            // Application Layer - Services
+            builder.Register<EventAggregator>(Lifetime.Singleton).As<IEventAggregator>();
+            builder.Register<IGameStateService, GameStateService>(Lifetime.Singleton);
+            builder.Register<ISceneLoader, SceneLoader>(Lifetime.Singleton);
+            
+            // Game Settings Service (with IInitializable for automatic initialization)
+            builder.Register<GameSettingsService>(Lifetime.Singleton)
+                .WithParameter(_gameConfig.GameSettings)
+                .WithParameter(_gameSettingsSaveObject)
+                .AsImplementedInterfaces()
+                .AsSelf();
 
-        // Infrastructure Layer
-        builder.RegisterInstance(_gameConfig).As<GameConfig>();
+            // Configuration
+            builder.RegisterInstance(_gameConfig).As<GameConfig>();
+            builder.RegisterInstance(_gameSettingsSaveObject);
+        }
 
-        // Cross-layer dependencies
-        //builder.Register<IAssetLoader, AddressablesLoader>(Lifetime.Singleton);
-    }
-
-    protected override void Awake()
-    {
-        base.Awake();
-        DontDestroyOnLoad(this);
+        protected override void Awake()
+        {
+            base.Awake();
+            DontDestroyOnLoad(gameObject);
+        }
     }
 }
