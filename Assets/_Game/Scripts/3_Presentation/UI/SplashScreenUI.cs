@@ -6,13 +6,15 @@ using VContainer;
 
 namespace _Game.Scripts.Presentation.UI
 {
+    /// <summary>
+    /// Handles the splash screen UI and animation.
+    /// </summary>
     public class SplashScreenUI : BaseUI
     {
         [SerializeField] private Image splashImage;
 
         private Animator animator;
         
-        // changed: make this assignable by the DI container (remove readonly)
         [Inject]
         private ISceneLoader _sceneLoader;
 
