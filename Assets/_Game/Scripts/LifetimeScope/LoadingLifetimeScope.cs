@@ -2,10 +2,16 @@ using _Game.Scripts.Presentation.UI;
 using VContainer;
 using VContainer.Unity;
 
-public class LoadingLifetimeScope : LifetimeScope
+namespace _Game.Scripts.LifetimeScope
 {
-    protected override void Configure(IContainerBuilder builder)
+    /// <summary>
+    /// Dependency injection container for the Loading scene.
+    /// </summary>
+    public class LoadingLifetimeScope : VContainer.Unity.LifetimeScope
     {
-        builder.RegisterComponentInHierarchy<LoadingSceneManager>();
+        protected override void Configure(IContainerBuilder builder)
+        {
+            builder.RegisterComponentInHierarchy<LoadingSceneManager>();
+        }
     }
 }
