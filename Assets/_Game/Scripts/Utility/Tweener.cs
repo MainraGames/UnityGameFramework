@@ -1,16 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
 using DG.Tweening;
+using Sirenix.OdinInspector;
 using UnityEngine;
 using UnityEngine.UI;
-namespace _Game.Scripts.Presentation.Scripts.Utility
+
+namespace _Game.Scripts.Utility
 {
+    /// <summary>
+    /// Component for running DOTween animations with configurable settings.
+    /// </summary>
+    /// <remarks>
+    /// Supports simultaneous and sequential tweens with various tween types
+    /// including Move, Scale, Rotate, Fade, and Color.
+    /// </remarks>
+    [AddComponentMenu("Game/Utility/Tweener")]
     public class Tweener : MonoBehaviour
     {
+        #region Nested Types
+        
+        /// <summary>
+        /// Settings for a single tween animation.
+        /// </summary>
         [System.Serializable]
         public class TweenSettings
         {
-            public string name;
+            /// <summary>
+            /// Type of tween animation.
+            /// </summary>
             public enum TweenType
             {
                 Move,
@@ -20,77 +37,208 @@ namespace _Game.Scripts.Presentation.Scripts.Utility
                 Color
             }
 
+            [FoldoutGroup("$name")]
+            public string name;
+            
+            [FoldoutGroup("$name")]
             public TweenType tweenType;
+            
+            [FoldoutGroup("$name")]
+            [ShowIf("@tweenType == TweenType.Move || tweenType == TweenType.Scale || tweenType == TweenType.Rotate")]
             public Vector3 targetValue;
-            public float duration;
-            public Ease easeType;
-            public float delay;
-            public bool loop;
-            public int loopCount;
-            public bool pingpong;
+            
+            [FoldoutGroup("$name")]
+            [ShowIf("tweenType", TweenType.Fade)]
+            [Range(0f, 1f)]
             public float targetAlpha;
+            
+            [FoldoutGroup("$name")]
+            [ShowIf("tweenType", TweenType.Color)]
             public Color targetColor;
-            public GameObject target;
-            public UnityEngine.Events.UnityEvent OnTweenComplete;
-            public AnimationCurve customCurve;
+            
+            [FoldoutGroup("$name")]
+            [MinValue(0f)]
+            public float duration;
+            
+            [FoldoutGroup("$name")]
+            [MinValue(0f)]
+            public float delay;
+            
+            [FoldoutGroup("$name")]
+            public Ease easeType;
+            
+            [FoldoutGroup("$name")]
             public bool useCustomCurve;
+            
+            [FoldoutGroup("$name")]
+            [ShowIf("useCustomCurve")]
+            public AnimationCurve customCurve;
+            
+            [FoldoutGroup("$name")]
+            public bool loop;
+            
+            [FoldoutGroup("$name")]
+            [ShowIf("loop")]
+            [Tooltip("-1 for infinite loops")]
+            public int loopCount;
+            
+            [FoldoutGroup("$name")]
+            [ShowIf("loop")]
+            public bool pingpong;
+            
+            [FoldoutGroup("$name")]
+            [Tooltip("Optional target. If null, uses this GameObject.")]
+            public GameObject target;
+            
+            [FoldoutGroup("$name")]
+            public UnityEngine.Events.UnityEvent OnTweenComplete;
         }
+        
+        #endregion
 
-        [Header("General Settings")]
+        #region Serialized Fields
+        
+        [BoxGroup("General Settings")]
+        [SerializeField]
         [Tooltip("Use unscaled time for tweens")]
-        public bool useUnscaledTime = false;
+        private bool _useUnscaledTime = false;
 
+        [BoxGroup("General Settings")]
+        [SerializeField]
         [Tooltip("Start tween from the initial active state of the object")]
-        public bool startFromInitialActiveState = true;
+        private bool _startFromInitialActiveState = true;
 
-        [Header("Tweens")]
-        public List<TweenSettings> simultaneousTweens = new List<TweenSettings>();
-        public List<TweenSettings> sequentialTweens = new List<TweenSettings>();
+        [BoxGroup("Tweens")]
+        [SerializeField]
+        [Tooltip("Tweens that run simultaneously")]
+        private List<TweenSettings> _simultaneousTweens = new List<TweenSettings>();
+        
+        [BoxGroup("Tweens")]
+        [SerializeField]
+        [Tooltip("Tweens that run one after another")]
+        private List<TweenSettings> _sequentialTweens = new List<TweenSettings>();
+        
+        #endregion
 
-        private int activeSimultaneousTweens = 0;
-        private List<Tween> activeTweens = new List<Tween>();
-        private Coroutine sequentialCoroutine;
+        #region Private Fields
+        
+        private int _activeSimultaneousTweens = 0;
+        private List<Tween> _activeTweens = new List<Tween>();
+        private Coroutine _sequentialCoroutine;
+        
+        #endregion
 
+        #region Unity Lifecycle
+        
         private void Start()
         {
-            if (startFromInitialActiveState)
+            if (_startFromInitialActiveState)
             {
                 RunSimultaneousTweens();
             }
         }
 
+        private void OnDestroy()
+        {
+            CancelAllTweens();
+        }
+        
+        #endregion
+
+        #region Public Methods
+        
+        /// <summary>
+        /// Runs all simultaneous tweens.
+        /// </summary>
+        [Button("Run Simultaneous Tweens")]
+        public void RunSimultaneousTweens()
+        {
+            foreach (var tween in _simultaneousTweens)
+            {
+                RunTween(tween, gameObject);
+            }
+        }
+
+        /// <summary>
+        /// Runs all sequential tweens one after another.
+        /// </summary>
+        [Button("Run Sequential Tweens")]
+        public void RunSequentialTweens()
+        {
+            if (_sequentialCoroutine != null)
+            {
+                StopCoroutine(_sequentialCoroutine);
+            }
+            _sequentialCoroutine = StartCoroutine(RunSequentialTweensCoroutine());
+        }
+
+        /// <summary>
+        /// Cancels all active tweens.
+        /// </summary>
+        [Button("Cancel All Tweens")]
+        public void CancelAllTweens()
+        {
+            foreach (var tween in _activeTweens)
+            {
+                tween?.Kill();
+            }
+            _activeTweens.Clear();
+            
+            if (_sequentialCoroutine != null)
+            {
+                StopCoroutine(_sequentialCoroutine);
+                _sequentialCoroutine = null;
+            }
+        }
+
+        /// <summary>
+        /// Pauses all active tweens.
+        /// </summary>
+        public void PauseAllTweens()
+        {
+            foreach (var tween in _activeTweens)
+            {
+                tween?.Pause();
+            }
+        }
+
+        /// <summary>
+        /// Resumes all paused tweens.
+        /// </summary>
+        public void ResumeAllTweens()
+        {
+            foreach (var tween in _activeTweens)
+            {
+                tween?.Play();
+            }
+        }
+        
+        #endregion
+
+        #region Private Methods - Tween Execution
+        
         private Tween RunTween(TweenSettings tween, GameObject defaultTarget)
         {
             GameObject target = tween.target != null ? tween.target : defaultTarget;
             if (target == null)
             {
-                Debug.LogWarning($"Target for tween {tween.name} is null. Skipping.");
+                Debug.LogWarning($"[Tweener] Target for tween '{tween.name}' is null. Skipping.");
                 return null;
             }
 
-            Tween tweenAction = null;
-            switch (tween.tweenType)
+            Tween tweenAction = tween.tweenType switch
             {
-                case TweenSettings.TweenType.Move:
-                    tweenAction = RunMoveTween(tween, target);
-                    break;
-                case TweenSettings.TweenType.Scale:
-                    tweenAction = RunScaleTween(tween, target);
-                    break;
-                case TweenSettings.TweenType.Rotate:
-                    tweenAction = RunRotateTween(tween, target);
-                    break;
-                case TweenSettings.TweenType.Fade:
-                    tweenAction = RunFadeTween(tween, target);
-                    break;
-                case TweenSettings.TweenType.Color:
-                    tweenAction = RunColorTween(tween, target);
-                    break;
-            }
+                TweenSettings.TweenType.Move => RunMoveTween(tween, target),
+                TweenSettings.TweenType.Scale => RunScaleTween(tween, target),
+                TweenSettings.TweenType.Rotate => RunRotateTween(tween, target),
+                TweenSettings.TweenType.Fade => RunFadeTween(tween, target),
+                TweenSettings.TweenType.Color => RunColorTween(tween, target),
+                _ => null
+            };
 
             if (tweenAction != null)
             {
-                activeTweens.Add(tweenAction);
+                _activeTweens.Add(tweenAction);
             }
 
             return tweenAction;
@@ -180,7 +328,11 @@ namespace _Game.Scripts.Presentation.Scripts.Utility
 
             return tweenAction;
         }
+        
+        #endregion
 
+        #region Private Methods - Tween Configuration
+        
         private void ApplyTweenSettings(TweenSettings tween, Tween tweenAction)
         {
             if (tween.useCustomCurve && tween.customCurve != null)
@@ -194,23 +346,23 @@ namespace _Game.Scripts.Presentation.Scripts.Utility
 
             tweenAction.SetDelay(tween.delay)
                 .SetLoops(tween.loop ? (tween.loopCount > 0 ? tween.loopCount : -1) : 1,
-                    tween.pingpong ? DG.Tweening.LoopType.Yoyo : DG.Tweening.LoopType.Restart)
+                    tween.pingpong ? LoopType.Yoyo : LoopType.Restart)
                 .OnComplete(() =>
                 {
                     OnTweenComplete(tween);
-                    activeTweens.Remove(tweenAction);
-                    if (--activeSimultaneousTweens <= 0 && sequentialCoroutine == null)
+                    _activeTweens.Remove(tweenAction);
+                    if (--_activeSimultaneousTweens <= 0 && _sequentialCoroutine == null)
                     {
                         RunSequentialTweens();
                     }
                 });
 
-            if (useUnscaledTime)
+            if (_useUnscaledTime)
             {
                 tweenAction.SetUpdate(true);
             }
 
-            activeSimultaneousTweens++;
+            _activeSimultaneousTweens++;
         }
 
         private void OnTweenComplete(TweenSettings tween)
@@ -218,26 +370,9 @@ namespace _Game.Scripts.Presentation.Scripts.Utility
             tween.OnTweenComplete?.Invoke();
         }
 
-        public void RunSimultaneousTweens()
-        {
-            foreach (var tween in simultaneousTweens)
-            {
-                RunTween(tween, gameObject);
-            }
-        }
-
-        public void RunSequentialTweens()
-        {
-            if (sequentialCoroutine != null)
-            {
-                StopCoroutine(sequentialCoroutine);
-            }
-            sequentialCoroutine = StartCoroutine(RunSequentialTweensCoroutine());
-        }
-
         private IEnumerator RunSequentialTweensCoroutine()
         {
-            foreach (var tween in sequentialTweens)
+            foreach (var tween in _sequentialTweens)
             {
                 Tween tweenAction = RunTween(tween, gameObject);
                 if (tweenAction != null)
@@ -245,32 +380,9 @@ namespace _Game.Scripts.Presentation.Scripts.Utility
                     yield return tweenAction.WaitForCompletion();
                 }
             }
-            sequentialCoroutine = null;
+            _sequentialCoroutine = null;
         }
-
-        public void CancelAllTweens()
-        {
-            foreach (var tween in activeTweens)
-            {
-                tween.Kill();
-            }
-            activeTweens.Clear();
-        }
-
-        public void PauseAllTweens()
-        {
-            foreach (var tween in activeTweens)
-            {
-                tween.Pause();
-            }
-        }
-
-        public void ResumeAllTweens()
-        {
-            foreach (var tween in activeTweens)
-            {
-                tween.Play();
-            }
-        }
+        
+        #endregion
     }
 }
