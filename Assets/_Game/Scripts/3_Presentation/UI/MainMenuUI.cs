@@ -36,7 +36,6 @@ namespace _Game.Scripts.Presentation.UI
 		protected override void Awake()
 		{
 			base.Awake();
-            _gameStateService.SetState(GameState.Menu);
 			play.onClick.AddListener(OnPlayClicked);
 			settings.onClick.AddListener(OnSettingsClicked);
 			quit.onClick.AddListener(OnQuitClicked);
