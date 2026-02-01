@@ -1,21 +1,41 @@
 using _Game.Scripts._2_Application.Services;
+using _Game.Scripts.GameConfiguration;
 using UnityEngine;
 using UnityEngine.UI;
+using TMPro;
 using VContainer;
+using Sirenix.OdinInspector;
 
 namespace _Game.Scripts.Presentation.UI
 {
     /// <summary>
-    /// UI component for displaying and modifying game settings.
-    /// Uses GameSettingsService for all settings operations.
+    /// Flexible UI component for displaying and modifying game settings.
+    /// All UI elements are optional - assign only the settings you need in the Inspector.
+    /// Automatically syncs with GameSettingsService events.
     /// </summary>
-    public class SettingsUI : MonoBehaviour
+    public class SettingsUI : BaseUI
     {
-        [Header("Sound Sliders")]
+        #region Sound Settings
+        
+        [TabGroup("Settings", "Sound")]
+        [InfoBox("All sound settings are optional. Assign only the controls you need.")]
+        [LabelText("Master Volume")]
         [SerializeField] private Slider _volumeMaster;
+        
+        [TabGroup("Settings", "Sound")]
+        [LabelText("Music Volume")]
         [SerializeField] private Slider _volumeMusic;
+        
+        [TabGroup("Settings", "Sound")]
+        [LabelText("SFX Volume")]
         [SerializeField] private Slider _volumeSFX;
+        
+        [TabGroup("Settings", "Sound")]
+        [LabelText("Voice Volume")]
         [SerializeField] private Slider _volumeVoice;
+        
+        [TabGroup("Settings", "Sound")]
+        [LabelText("Ambient Volume")]
         [SerializeField] private Slider _volumeAmbient;
         
         [Inject] private GameSettingsService _settingsService;
